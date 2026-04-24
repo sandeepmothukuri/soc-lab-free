@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Full and Deep Vulnerability Scan - SOC Lab
+  Replaces: Nessus Full Scan, Tenable.sc Advanced Scan
+
+  GVM protocol message templates for gvm-cli socket.
+  Run each block individually via the gvm-cli socket interface.
+  Pipe each XML block to gvm-cli with your admin credentials.
+-->
+<gmp_commands>
+
+  <create_credential>
+    <name>SOC-Lab-SSH-Key</name>
+    <type>usk</type>
+    <login>gvm-scanner</login>
+    <key>
+      <private>PASTE_PRIVATE_KEY_HERE</private>
+    </key>
+    <comment>SSH key for authenticated vulnerability scanning</comment>
+  </create_credential>
+
+  <create_credential>
+    <name>SOC-Lab-Windows-SMB</name>
+    <type>up</type>
+    <login>Administrator</login>
+    <password>YourWindowsPassword</password>
+    <comment>Windows admin creds for WMI scanning</comment>
+  </create_credential>
+
+  <create_target>
+    <name>SOC-Lab-All-Targets</name>
+    <hosts>192.168.30.0/24</hosts>
+    <port_list id="33d0cd82-57c6-11e1-8ed1-406186ea4fc5"></port_list>
+    <ssh_credential id="REPLACE_WITH_SSH_UUID">
+      <port>22</port>
+    </ssh_credential>
+    <smb_credential id="REPLACE_WITH_SMB_UUID"></smb_credential>
+    <comment>Full SOC Lab target range</comment>
+  </create_target>
+
+  <create_task>
+    <name>SOC-Lab-Full-Deep-Scan</name>
+    <comment>Full and Deep authenticated scan</comment>
+    <config id="698f691e-7489-11df-9d8c-002264764cea"></config>
+    <target id="REPLACE_WITH_TARGET_UUID"></target>
+    <scanner id="08b69003-5fc2-4037-a479-93b440211c73"></scanner>
+    <preferences>
+      <preference>
+        <scanner_name>max_hosts</scanner_name>
+        <value>10</value>
+      </preference>
+      <preference>
+        <scanner_name>max_checks</scanner_name>
+        <value>4</value>
+      </preference>
+    </preferences>
+  </create_task>
+
+</gmp_commands>

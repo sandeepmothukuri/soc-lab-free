@@ -1,0 +1,247 @@
+<!-- Wazuh Local Rules — SOC Lab Custom Detections -->
+<!-- File: /var/ossec/etc/rules/local_rules.xml -->
+<!-- These rules extend the default Wazuh ruleset with SOC lab-specific detections -->
+
+<group name="soc-lab,">
+
+  <!-- ============================================================ -->
+  <!--  RECONNAISSANCE DETECTION (MITRE TA0043)                   -->
+  <!-- ============================================================ -->
+
+  <!-- Nmap scan detected via firewall/auth logs -->
+  <rule id="100001" level="10">
+    <if_group>firewall</if_group>
+    <match>NMAP</match>
+    <description>Nmap scan detected from $(srcip)</description>
+    <mitre>
+      <id>T1046</id>
+    </mitre>
+    <group>recon,nmap,</group>
+  </rule>
+
+  <!-- Port scan pattern: many TCP RST responses -->
+  <rule id="100002" level="10" frequency="30" timeframe="60">
+    <if_matched_sid>100001</if_matched_sid>
+    <same_source_ip />
+    <description>Port scan - 30 NMAP events in 60 seconds from $(srcip)</description>
+    <mitre>
+      <id>T1046</id>
+    </mitre>
+    <group>recon,port_scan,</group>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!--  BRUTE FORCE EXTENDED DETECTION (MITRE T1110)              -->
+  <!-- ============================================================ -->
+
+  <!-- SSH brute force — extended (beyond default 5763) -->
+  <rule id="100010" level="14" frequency="20" timeframe="120">
+    <if_matched_sid>5716</if_matched_sid>
+    <same_source_ip />
+    <description>SSH Brute Force — 20+ failed attempts in 2 minutes from $(srcip)</description>
+    <mitre>
+      <id>T1110.001</id>
+    </mitre>
+    <group>brute_force,ssh,high_severity,</group>
+  </rule>
+
+  <!-- RDP brute force (Windows) -->
+  <rule id="100011" level="12" frequency="10" timeframe="60">
+    <if_matched_sid>60122</if_matched_sid>
+    <same_source_ip />
+    <description>RDP Brute Force — 10+ failed attempts from $(srcip)</description>
+    <mitre>
+      <id>T1110.001</id>
+    </mitre>
+    <group>brute_force,rdp,</group>
+  </rule>
+
+  <!-- Web login brute force -->
+  <rule id="100012" level="10" frequency="20" timeframe="60">
+    <if_matched_sid>31151</if_matched_sid>
+    <same_source_ip />
+    <description>Web Brute Force — 20+ HTTP 401/403 from $(srcip)</description>
+    <mitre>
+      <id>T1110.001</id>
+    </mitre>
+    <group>brute_force,web,</group>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!--  PRIVILEGE ESCALATION (MITRE T1068, T1548)                 -->
+  <!-- ============================================================ -->
+
+  <!-- Sudo to root -->
+  <rule id="100020" level="8">
+    <if_sid>5402</if_sid>
+    <match>root</match>
+    <description>User escalated to root via sudo on $(hostname)</description>
+    <mitre>
+      <id>T1548.003</id>
+    </mitre>
+    <group>privesc,sudo,</group>
+  </rule>
+
+  <!-- New SUID binary created -->
+  <rule id="100021" level="12">
+    <if_sid>550</if_sid>
+    <field name="file.perm">^[0-9][0-9][0-9][0-9]$</field>
+    <match>SUID</match>
+    <description>New SUID binary created: $(file.path) — Possible privilege escalation</description>
+    <mitre>
+      <id>T1548.001</id>
+    </mitre>
+    <group>privesc,suid,fim,</group>
+  </rule>
+
+  <!-- /etc/passwd modification -->
+  <rule id="100022" level="14">
+    <if_sid>550,554</if_sid>
+    <field name="file.path">/etc/passwd</field>
+    <description>Critical file modified: /etc/passwd on $(hostname) — Possible account backdoor</description>
+    <mitre>
+      <id>T1136.001</id>
+    </mitre>
+    <group>privesc,passwd,critical,</group>
+  </rule>
+
+  <!-- /etc/sudoers modification -->
+  <rule id="100023" level="14">
+    <if_sid>550,554</if_sid>
+    <field name="file.path">/etc/sudoers</field>
+    <description>Critical file modified: /etc/sudoers — Possible privilege escalation backdoor</description>
+    <mitre>
+      <id>T1548.003</id>
+    </mitre>
+    <group>privesc,sudoers,critical,</group>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!--  LATERAL MOVEMENT (MITRE T1021)                            -->
+  <!-- ============================================================ -->
+
+  <!-- SSH from an internal non-management host -->
+  <rule id="100030" level="8">
+    <if_sid>5715</if_sid>
+    <srcip>192.168.30.0/24</srcip>
+    <description>SSH from target network $(srcip) — Possible lateral movement</description>
+    <mitre>
+      <id>T1021.004</id>
+    </mitre>
+    <group>lateral_movement,ssh,</group>
+  </rule>
+
+  <!-- Multiple SSH sessions from same source in short time -->
+  <rule id="100031" level="10" frequency="5" timeframe="60">
+    <if_matched_sid>5715</if_matched_sid>
+    <same_source_ip />
+    <description>Multiple SSH connections from $(srcip) — Possible lateral movement or scanning</description>
+    <mitre>
+      <id>T1021.004</id>
+    </mitre>
+    <group>lateral_movement,ssh,</group>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!--  DATA EXFILTRATION / NETWORK (MITRE T1041, T1537)          -->
+  <!-- ============================================================ -->
+
+  <!-- Large outbound data transfer via curl/wget -->
+  <rule id="100040" level="8">
+    <if_sid>1002</if_sid>
+    <match>curl|wget</match>
+    <match>--output|-O</match>
+    <description>Large file transfer via curl/wget from $(hostname) — Possible exfiltration</description>
+    <mitre>
+      <id>T1041</id>
+    </mitre>
+    <group>exfiltration,</group>
+  </rule>
+
+  <!-- Netcat detected -->
+  <rule id="100041" level="10">
+    <if_sid>1002</if_sid>
+    <match>nc -l|netcat -l|ncat -l</match>
+    <description>Netcat listener started on $(hostname) — Backdoor or C2 channel suspected</description>
+    <mitre>
+      <id>T1059.004</id>
+    </mitre>
+    <group>c2,backdoor,</group>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!--  PERSISTENCE (MITRE T1053, T1543)                          -->
+  <!-- ============================================================ -->
+
+  <!-- New cron job added -->
+  <rule id="100050" level="8">
+    <if_sid>550</if_sid>
+    <field name="file.path">/etc/cron</field>
+    <description>New cron job file created: $(file.path) — Verify persistence mechanism</description>
+    <mitre>
+      <id>T1053.003</id>
+    </mitre>
+    <group>persistence,cron,</group>
+  </rule>
+
+  <!-- New systemd service created -->
+  <rule id="100051" level="8">
+    <if_sid>550</if_sid>
+    <field name="file.path">/etc/systemd/system</field>
+    <description>New systemd service file: $(file.path) — Verify legitimacy</description>
+    <mitre>
+      <id>T1543.002</id>
+    </mitre>
+    <group>persistence,systemd,</group>
+  </rule>
+
+  <!-- SSH authorized_keys modified -->
+  <rule id="100052" level="12">
+    <if_sid>550,554</if_sid>
+    <field name="file.path">authorized_keys</field>
+    <description>SSH authorized_keys file modified: $(file.path) — Backdoor key possible</description>
+    <mitre>
+      <id>T1098.004</id>
+    </mitre>
+    <group>persistence,ssh,critical,</group>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!--  MALWARE / WEBSHELL DETECTION (MITRE T1505.003)            -->
+  <!-- ============================================================ -->
+
+  <!-- Webshell patterns in web directories -->
+  <rule id="100060" level="14">
+    <if_sid>550</if_sid>
+    <field name="file.path">/var/www</field>
+    <field name="file.path">\.php$</field>
+    <description>New PHP file in web root: $(file.path) — Possible webshell</description>
+    <mitre>
+      <id>T1505.003</id>
+    </mitre>
+    <group>webshell,malware,critical,</group>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!--  OPENVAS INTEGRATION ALERTS                                 -->
+  <!-- ============================================================ -->
+
+  <!-- Critical vulnerability found by OpenVAS scan -->
+  <rule id="100070" level="12">
+    <decoded_as>json</decoded_as>
+    <field name="source">openvas</field>
+    <field name="severity">10|9</field>
+    <description>OpenVAS: Critical vulnerability on $(dstip) — CVE: $(cve)</description>
+    <group>vuln_scan,openvas,critical,</group>
+  </rule>
+
+  <!-- High severity vulnerability -->
+  <rule id="100071" level="8">
+    <decoded_as>json</decoded_as>
+    <field name="source">openvas</field>
+    <field name="severity">7|8</field>
+    <description>OpenVAS: High severity vulnerability on $(dstip)</description>
+    <group>vuln_scan,openvas,</group>
+  </rule>
+
+</group>

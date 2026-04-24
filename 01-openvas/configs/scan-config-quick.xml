@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Quick Host Discovery Scan - Lightweight, fast asset enumeration
+  Equivalent to Nessus Host Discovery or Tenable.sc Discovery Scan
+
+  Run time: 2-5 minutes for /24 network
+  Finds: Live hosts, open ports, OS fingerprint, basic services
+  Does NOT run full NVT vulnerability checks.
+
+  Scan Config UUIDs (built-in to OpenVAS, no need to create):
+    Host Discovery:  2d3f051c-55ba-11e3-bf43-406186ea4fc5
+    System Discovery: bbca7412-a950-11e3-9109-406186ea4fc5
+    Full and Fast:   daba56c8-73ec-11df-a475-002264764cea
+    Full and Deep:   698f691e-7489-11df-9d8c-002264764cea
+-->
+<gmp_commands>
+
+  <create_target>
+    <name>SOC-Lab-Discovery</name>
+    <hosts>192.168.30.0/24</hosts>
+    <port_list id="730ef368-57e2-11e1-a90f-406186ea4fc5"></port_list>
+    <comment>Quick host discovery - common ports only</comment>
+  </create_target>
+
+  <create_task>
+    <name>SOC-Lab-Quick-Discovery</name>
+    <comment>Host discovery scan - no vulnerability checks</comment>
+    <config id="2d3f051c-55ba-11e3-bf43-406186ea4fc5"></config>
+    <target id="REPLACE_WITH_TARGET_UUID"></target>
+    <scanner id="08b69003-5fc2-4037-a479-93b440211c73"></scanner>
+    <schedule_periods>0</schedule_periods>
+    <preferences>
+      <preference>
+        <scanner_name>max_hosts</scanner_name>
+        <value>30</value>
+      </preference>
+      <preference>
+        <scanner_name>max_checks</scanner_name>
+        <value>4</value>
+      </preference>
+    </preferences>
+  </create_task>
+
+</gmp_commands>

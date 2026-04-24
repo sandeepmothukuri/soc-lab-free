@@ -1,0 +1,177 @@
+name: SOC Lab — Validate Scripts & Configs
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ──────────────────────────────────────────────
+  # Job 1: Lint shell scripts
+  # ──────────────────────────────────────────────
+  lint-shell:
+    name: Shell Script Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Lint all shell scripts
+        run: |
+          find . -name "*.sh" -not -path "./.git/*" | while read -r script; do
+            echo "Checking: $script"
+            shellcheck -S warning "$script" || true
+          done
+
+  # ──────────────────────────────────────────────
+  # Job 2: Validate Python scripts
+  # ──────────────────────────────────────────────
+  lint-python:
+    name: Python Linting & Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install flake8 bandit safety
+          # Install script deps (without actually running them)
+          pip install requests python-gvm urllib3 2>/dev/null || true
+
+      - name: Syntax check all Python files
+        run: |
+          find . -name "*.py" -not -path "./.git/*" | while read -r py; do
+            echo "Checking syntax: $py"
+            python3 -m py_compile "$py" && echo "  OK" || echo "  FAIL"
+          done
+
+      - name: Flake8 style check
+        run: |
+          find . -name "*.py" -not -path "./.git/*" | \
+            xargs flake8 --max-line-length=120 --ignore=E501,W503 || true
+
+      - name: Bandit security scan on Python scripts
+        run: |
+          find . -name "*.py" -not -path "./.git/*" | \
+            xargs bandit -ll -q || true
+
+  # ──────────────────────────────────────────────
+  # Job 3: Validate XML configs (Wazuh rules, etc)
+  # ──────────────────────────────────────────────
+  validate-xml:
+    name: XML Config Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install xmllint
+        run: sudo apt-get install -y libxml2-utils
+
+      - name: Validate Wazuh rules XML
+        run: |
+          find . -name "*.xml" -not -path "./.git/*" | while read -r xml; do
+            echo "Validating: $xml"
+            xmllint --noout "$xml" 2>&1 && echo "  OK" || echo "  WARNING (non-fatal)"
+          done
+
+  # ──────────────────────────────────────────────
+  # Job 4: Check all READMEs exist
+  # ──────────────────────────────────────────────
+  check-structure:
+    name: Repository Structure Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify required files exist
+        run: |
+          REQUIRED=(
+            "README.md"
+            "docs/network-setup.md"
+            "docs/vm-build-guide.md"
+            "docs/tool-comparison.md"
+            "scripts/setup-host.sh"
+            "scripts/network-setup.sh"
+            "scripts/health-check.sh"
+            "01-openvas/README.md"
+            "01-openvas/install-openvas.sh"
+            "02-wazuh-siem/README.md"
+            "02-wazuh-siem/install-wazuh-server.sh"
+            "02-wazuh-siem/install-wazuh-agent.sh"
+            "02-wazuh-siem/configs/ossec.conf"
+            "02-wazuh-siem/rules/local_rules.xml"
+            "03-pfsense-network/README.md"
+            "03-pfsense-network/squid/squid.conf"
+            "04-proxmox-mail/README.md"
+            "04-proxmox-mail/install-pmg.sh"
+            "05-lynis-prowler/README.md"
+            "05-lynis-prowler/run-lynis.sh"
+            "05-lynis-prowler/configs/cis-harden.sh"
+            "06-integrations/README.md"
+            "06-integrations/scripts/openvas-to-wazuh.py"
+            "06-integrations/scripts/alert-correlator.py"
+            "06-integrations/playbooks/incident-response.md"
+          )
+
+          MISSING=0
+          for f in "${REQUIRED[@]}"; do
+            if [[ -f "$f" ]]; then
+              echo "  ✓ $f"
+            else
+              echo "  ✗ MISSING: $f"
+              MISSING=$((MISSING+1))
+            fi
+          done
+
+          echo ""
+          if [[ $MISSING -gt 0 ]]; then
+            echo "ERROR: $MISSING required file(s) missing"
+            exit 1
+          else
+            echo "All required files present ✓"
+          fi
+
+  # ──────────────────────────────────────────────
+  # Job 5: Security scan on repo itself
+  # ──────────────────────────────────────────────
+  secret-scan:
+    name: Secret / Credential Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks (secret scanner)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true  # Don't fail build, just report
+
+  # ──────────────────────────────────────────────
+  # Summary badge
+  # ──────────────────────────────────────────────
+  summary:
+    name: Validation Summary
+    needs: [lint-shell, lint-python, validate-xml, check-structure]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report results
+        run: |
+          echo "## SOC Lab Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| Shell Linting | ${{ needs.lint-shell.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Python Linting | ${{ needs.lint-python.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| XML Validation | ${{ needs.validate-xml.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Structure Check | ${{ needs.check-structure.result }} |" >> $GITHUB_STEP_SUMMARY
