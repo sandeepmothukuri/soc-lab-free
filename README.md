@@ -1,5 +1,7 @@
 # 🛡️ Free SOC Lab — Real-Time Hands-On Project
 
+[![CI](https://github.com/sandeepmothukuri/soc-lab-free/actions/workflows/lab-validation.yml/badge.svg)](https://github.com/sandeepmothukuri/soc-lab-free/actions) [![Website](https://img.shields.io/badge/Website-cybertechnology.in-blue)](https://cybertechnology.in) [![MITRE ATT&CK](https://img.shields.io/badge/MITRE-ATT%26CK-red)](https://attack.mitre.org/)
+
 > **100% Free | Production-Grade | Local VM-Based | GitHub-Ready**
 
 A fully functional Security Operations Center (SOC) lab built entirely with **open-source and free tools**, mapped 1:1 to enterprise-grade paid security platforms. Designed for advanced security practitioners who want real hands-on experience.
@@ -267,7 +269,9 @@ MIT License — Free to use, modify, and distribute.
 
 **Sandeep Mothukuri**
 - GitHub: [@sandeepmothukuri](https://github.com/sandeepmothukuri)
-- Portfolio: [github.com/sandeepmothukuri](https://github.com/sandeepmothukuri)
+- Website: [cybertechnology.in](https://cybertechnology.in)
+- LinkedIn: [linkedin.com/in/sandeepmothukuris](https://www.linkedin.com/in/sandeepmothukuris)
+- Email: sandeep.mothukuris@gmail.com
 
 ---
 
