@@ -170,7 +170,7 @@ soc-lab-free/
 
 ```bash
 # Clone this repo
-git clone https://github.com/YOUR_USERNAME/soc-lab-free.git
+git clone https://github.com/sandeepmothukuri/soc-lab-free.git
 cd soc-lab-free
 
 # Run host setup (installs VirtualBox, dependencies)
