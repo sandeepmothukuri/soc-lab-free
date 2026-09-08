@@ -1,7 +1,7 @@
 # 🛡️ Free SOC Lab — Real-Time Hands-On Project
 ![100% Free](https://img.shields.io/badge/Cost-100%25%20Free-brightgreen)
 
-[![CI](https://github.com/sandeepmothukuri/soc-lab-free/actions/workflows/lab-validation.yml/badge.svg)](https://github.com/sandeepmothukuri/soc-lab-free/actions) [![Website](https://img.shields.io/badge/Website-cybertechnology.in-blue)](https://cybertechnology.in) [![MITRE ATT&CK](https://img.shields.io/badge/MITRE-ATT%26CK-red)](https://attack.mitre.org/)
+[![CI](https://github.com/sandeepmothukuri/SOC-Detection-and-Threat-Hunting-Lab-free/actions/workflows/lab-validation.yml/badge.svg)](https://github.com/sandeepmothukuri/SOC-Detection-and-Threat-Hunting-Lab-free/actions) [![Website](https://img.shields.io/badge/Website-cybertechnology.in-blue)](https://cybertechnology.in) [![MITRE ATT&CK](https://img.shields.io/badge/MITRE-ATT%26CK-red)](https://attack.mitre.org/)
 
 > **100% Free | Production-Grade | Local VM-Based | GitHub-Ready**
 
@@ -92,7 +92,7 @@ A fully functional Security Operations Center (SOC) lab built entirely with **op
 ## 📁 Repository Structure
 
 ```
-soc-lab-free/
+SOC-Detection-and-Threat-Hunting-Lab-free/
 ├── README.md                          # This file
 ├── docs/
 │   ├── network-setup.md               # VirtualBox network config
@@ -173,8 +173,8 @@ soc-lab-free/
 
 ```bash
 # Clone this repo
-git clone https://github.com/sandeepmothukuri/soc-lab-free.git
-cd soc-lab-free
+git clone https://github.com/sandeepmothukuri/SOC-Detection-and-Threat-Hunting-Lab-free.git
+cd SOC-Detection-and-Threat-Hunting-Lab-free
 
 # Run host setup (installs VirtualBox, dependencies)
 chmod +x scripts/setup-host.sh
@@ -280,12 +280,12 @@ MIT License — Free to use, modify, and distribute.
 
 | Repository | Description |
 |---|---|
-| [ai-soc-lab](https://github.com/sandeepmothukuri/ai-soc-lab) | AI-augmented SOC with Wazuh + TheHive + Ollama (LLaMA3) for automated triage |
-| [advanced-soc-lab-v2.0](https://github.com/sandeepmothukuri/advanced-soc-lab-v2.0) | 12-tool SOC lab with OpenSearch, Suricata, Zeek, MISP, Caldera, Velociraptor |
+| [ai-SOC-Detection-and-Threat-Hunting-Lab](https://github.com/sandeepmothukuri/ai-SOC-Detection-and-Threat-Hunting-Lab) | AI-augmented SOC with Wazuh + TheHive + Ollama (LLaMA3) for automated triage |
+| [advanced-SOC-Detection-and-Threat-Hunting-Lab-v2.0](https://github.com/sandeepmothukuri/advanced-SOC-Detection-and-Threat-Hunting-Lab-v2.0) | 12-tool SOC lab with OpenSearch, Suricata, Zeek, MISP, Caldera, Velociraptor |
 | [Autonomous-SOC-Lab](https://github.com/sandeepmothukuri/Autonomous-SOC-Lab) | Autonomous SOC with AI-driven detection and self-healing playbooks |
 | [soc-threat-hunting-lab](https://github.com/sandeepmothukuri/soc-threat-hunting-lab) | Threat detection lab — Zeek, RITA, Arkime, Velociraptor, OSQuery, MISP |
-| [soc-lab-free](https://github.com/sandeepmothukuri/soc-lab-free) | Free SOC lab — OpenVAS, Wazuh, pfSense, Proxmox Mail, Lynis |
-| [soc-lab](https://github.com/sandeepmothukuri/soc-lab) | SOC analyst home lab — Wazuh SIEM, Sysmon, MITRE ATT\&CK mapping |
+| [SOC-Detection-and-Threat-Hunting-Lab-free](https://github.com/sandeepmothukuri/SOC-Detection-and-Threat-Hunting-Lab-free) | Free SOC lab — OpenVAS, Wazuh, pfSense, Proxmox Mail, Lynis |
+| [SOC-Detection-and-Threat-Hunting-Lab](https://github.com/sandeepmothukuri/SOC-Detection-and-Threat-Hunting-Lab) | SOC analyst home lab — Wazuh SIEM, Sysmon, MITRE ATT\&CK mapping |
 | [cyberblue](https://github.com/sandeepmothukuri/cyberblue) | Containerised blue team platform — SIEM, DFIR, CTI, SOAR, Network Analysis |
 
 
