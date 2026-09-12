@@ -84,12 +84,6 @@ sudo ./scripts/setup-host.sh
 
 ---
 
-## 📄 License
-
-MIT License — Free to use, modify, and distribute.
-
----
-
 # 👤 Author
 
 ## Sandeep Mothukuri
